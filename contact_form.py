@@ -1,13 +1,13 @@
 from datetime import datetime
 from firebase_init import get_db
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 db = get_db()
+
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 def contact_form(data):
     try:
@@ -24,32 +24,48 @@ def contact_form(data):
         })
         print(f"✅ Firebase saved → {new_contact.key}")
 
-        # ── Print env vars to debug ───────────────────────────────
-        SMTP_USER     = os.getenv("SMTP_USER")
-        SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-        ADMIN_EMAIL   = os.getenv("ADMIN_EMAIL")
-        CLIENT_NAME   = os.getenv("CLIENT_NAME", "MNPIEPL")
+        CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
+        ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+        FROM_EMAIL  = "onboarding@resend.dev"
 
-        print(f"📧 SMTP_USER={SMTP_USER}")
-        print(f"🔑 SMTP_PASSWORD={'SET' if SMTP_PASSWORD else 'NOT SET'}")
-        print(f"📬 ADMIN_EMAIL={ADMIN_EMAIL}")
+        # ── Email to User ─────────────────────────────────────────
+        resend.Emails.send({
+            "from":    FROM_EMAIL,
+            "to":      data["email"],
+            "subject": "Thank you for contacting us!",
+            "html":    f"""
+                <h2>Thank You for Contacting {CLIENT_NAME}</h2>
+                <p>Dear {data['name']},</p>
+                <p>We received your message and will get back to you within 24 hours.</p>
+                <p>Regards,<br>{CLIENT_NAME} Team</p>
+            """
+        })
+        print(f"✅ User email sent → {data['email']}")
 
-        # ── Send Email Directly ───────────────────────────────────
-        msg = MIMEMultipart()
-        msg['From']    = SMTP_USER
-        msg['To']      = ADMIN_EMAIL
-        msg['Subject'] = f"New Contact - {data.get('subject')}"
-        msg.attach(MIMEText(f"Name: {data.get('name')}\nEmail: {data.get('email')}\nMessage: {data.get('message')}", 'plain'))
-
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.send_message(msg)
-
-        print(f"✅ Email sent → {ADMIN_EMAIL}")
+        # ── Email to Admin ────────────────────────────────────────
+        resend.Emails.send({
+            "from":    FROM_EMAIL,
+            "to":      ADMIN_EMAIL,
+            "subject": f"New Contact Form - {data.get('subject')}",
+            "html":    f"""
+                <h3>New Contact Form Submission</h3>
+                <p><b>Name:</b> {data.get('name')}</p>
+                <p><b>Phone:</b> {data.get('phone')}</p>
+                <p><b>Email:</b> {data.get('email')}</p>
+                <p><b>Subject:</b> {data.get('subject')}</p>
+                <p><b>Message:</b> {data.get('message')}</p>
+                <p><b>IP:</b> {data.get('ip_address')}</p>
+            """
+        })
+        print(f"✅ Admin email sent → {ADMIN_EMAIL}")
 
         return {"success": True, "message": "Message received!"}
 
     except Exception as e:
-        print(f"❌ FULL ERROR: {e}")
+        print(f"❌ Error: {e}")
         return {"success": False, "message": str(e)}
+```
+
+## Step 5 — Add to Render Environment
+```
+RESEND_API_KEY   your_resend_api_key
