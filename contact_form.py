@@ -6,12 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 db = get_db()
-
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 def contact_form(data):
     try:
-        # ── Save to Firebase ──────────────────────────────────────
+        #── Save to Firebase ──────────────────────────────────────
         ref = db.reference("contacts")
         new_contact = ref.push({
             "name":       data.get("name"),
@@ -64,8 +63,3 @@ def contact_form(data):
     except Exception as e:
         print(f"❌ Error: {e}")
         return {"success": False, "message": str(e)}
-```
-
-## Step 5 — Add to Render Environment
-```
-RESEND_API_KEY   your_resend_api_key
