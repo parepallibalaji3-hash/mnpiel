@@ -5,16 +5,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 import threading
-import concurrent.futures
 from dotenv import load_dotenv
 
 load_dotenv()
 db = get_db()
-_executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
-# ── Reusable SMTP Send ───────────────────────────────────────────
 def _send_email(to_email, subject, body):
-    # Read env vars HERE (not at top) so they're always fresh
     SMTP_SERVER  = os.getenv("SMTP_HOST", "smtp.gmail.com")
     SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
     SMTP_EMAIL   = os.getenv("SMTP_USER")
@@ -40,7 +36,6 @@ def _send_email(to_email, subject, body):
     except Exception as e:
         print(f"❌ Email error ({to_email}): {e}")
 
-# ── Save to Firebase ─────────────────────────────────────────────
 def _save_to_firebase(data):
     try:
         ref = db.reference("contacts")
@@ -57,15 +52,15 @@ def _save_to_firebase(data):
     except Exception as e:
         print(f"❌ Firebase error: {e}")
 
-# ── Background Task ──────────────────────────────────────────────
 def _process_contact(data):
     CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
     ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
-    _executor.submit(_save_to_firebase, data)
+    # Save to Firebase
+    _save_to_firebase(data)
 
-    _executor.submit(
-        _send_email,
+    # Send user email
+    _send_email(
         data["email"],
         "Thank you for contacting us!",
         f"Hi {data['name']},\n\n"
@@ -73,9 +68,9 @@ def _process_contact(data):
         f"Best regards,\n{CLIENT_NAME} Team"
     )
 
+    # Send admin email
     if ADMIN_EMAIL:
-        _executor.submit(
-            _send_email,
+        _send_email(
             ADMIN_EMAIL,
             f"New Contact Form - {data.get('subject')}",
             f"NEW CONTACT FORM SUBMISSION\n\n"
@@ -90,10 +85,13 @@ def _process_contact(data):
     else:
         print("⚠ ADMIN_EMAIL not set!")
 
-# ── Main Contact Form Handler ────────────────────────────────────
 def contact_form(data):
     try:
-        _executor.submit(_process_contact, data)
+        # Run in thread but WAIT for it to complete
+        t = threading.Thread(target=_process_contact, args=(data,))
+        t.start()
+        t.join(timeout=15)  # Wait up to 15 seconds
+
         return {
             "success": True,
             "message": "Message received!",
