@@ -1,16 +1,49 @@
 from datetime import datetime
 from firebase_init import get_db
-import resend
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import os
+import threading
+import concurrent.futures
 from dotenv import load_dotenv
 
 load_dotenv()
 db = get_db()
-resend.api_key = os.getenv("RESEND_API_KEY")
 
-def contact_form(data):
+_executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+
+# ── Reusable SMTP Send ───────────────────────────────────────────
+def _send_email(to_email, subject, body):
+    SMTP_EMAIL    = os.getenv("SMTP_USER")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+    CLIENT_NAME   = os.getenv("CLIENT_NAME", "MNPIEPL")
+
+    if not SMTP_EMAIL or not SMTP_PASSWORD:
+        print(f"⚠ SMTP not configured - USER:{SMTP_EMAIL}")
+        return
+
     try:
-        # ── Save to Firebase ──────────────────────────────────────
+        msg = MIMEMultipart()
+        msg['From']    = f"{CLIENT_NAME} <{SMTP_EMAIL}>"
+        msg['To']      = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Use port 465 with SSL (not 587 TLS — blocked on Render free tier)
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=10) as server:
+            server.login(SMTP_EMAIL, SMTP_PASSWORD)
+            server.send_message(msg)
+
+        print(f"✅ Email sent → {to_email}")
+    except Exception as e:
+        print(f"❌ Email error ({to_email}): {e}")
+
+# ── Save to Firebase ─────────────────────────────────────────────
+def _save_to_firebase(data):
+    try:
         ref = db.reference("contacts")
         new_contact = ref.push({
             "name":       data.get("name"),
@@ -21,74 +54,53 @@ def contact_form(data):
             "created_at": datetime.utcnow().isoformat(),
             "ip_address": data.get("ip_address"),
         })
-        print(f"✅ Firebase saved → {new_contact.key}")
-
-        CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
-        ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "parepallibalaji3@gmail.com")
-        FROM_EMAIL  = "onboarding@resend.dev"
-
-        # ── Email to Admin (New Contact Notification) ─────────────
-        resend.Emails.send({
-            "from":    FROM_EMAIL,
-            "to":      ADMIN_EMAIL,
-            "subject": f"New Contact Form - {data.get('subject')}",
-            "html":    f"""
-                <h2>New Contact Form Submission</h2>
-                <table style="border-collapse: collapse; width: 100%;">
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>Name</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{data.get('name')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>Phone</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{data.get('phone')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>Email</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{data.get('email')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>Subject</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{data.get('subject')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>Message</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{data.get('message')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>IP Address</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{data.get('ip_address')}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd;"><b>Timestamp</b></td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{datetime.utcnow().isoformat()}</td>
-                    </tr>
-                </table>
-            """
-        })
-        print(f"✅ Admin email sent → {ADMIN_EMAIL}")
-
-        # ── Email to Admin (User Thank You Copy) ──────────────────
-        resend.Emails.send({
-            "from":    FROM_EMAIL,
-            "to":      ADMIN_EMAIL,
-            "subject": f"Thank You Email Copy - {data.get('name')}",
-            "html":    f"""
-                <p><b>Note:</b> This is a copy of the thank you email that would be sent to {data.get('email')}</p>
-                <hr>
-                <h2>Thank You for Contacting {CLIENT_NAME}</h2>
-                <p>Dear {data.get('name')},</p>
-                <p>We have received your enquiry regarding <b>{data.get('subject')}</b>.</p>
-                <p>Our team will get back to you within 24 hours.</p>
-                <br>
-                <p>Regards,<br>
-                <b>{CLIENT_NAME} Team</b></p>
-            """
-        })
-        print(f"✅ Thank you copy sent → {ADMIN_EMAIL}")
-
-        return {"success": True, "message": "Message received!"}
-
+        print(f"✅ Saved to Firebase → {new_contact.key}")
     except Exception as e:
-        print(f"❌ Error: {e}")
-        return {"success": False, "message": str(e)}
+        print(f"❌ Firebase error: {e}")
+
+# ── Background Task: Save + Emails ──────────────────────────────
+def _process_contact(data):
+    CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+
+    futures = [
+        _executor.submit(_save_to_firebase, data),
+        _executor.submit(
+            _send_email,
+            data["email"],
+            "Thank you for contacting us!",
+            f"Hi {data['name']},\n\n"
+            f"Thank you for reaching out! We received your message and will get back to you soon.\n\n"
+            f"Best regards,\n{CLIENT_NAME} Team"
+        ),
+        _executor.submit(
+            _send_email,
+            ADMIN_EMAIL,
+            f"New Contact Form - {data.get('subject')}",
+            f"NEW CONTACT FORM SUBMISSION\n\n"
+            f"Name:    {data.get('name')}\n"
+            f"Phone:   {data.get('phone')}\n"
+            f"Email:   {data.get('email')}\n"
+            f"Subject: {data.get('subject')}\n\n"
+            f"Message:\n{data.get('message')}\n\n"
+            f"---\n"
+            f"IP:        {data.get('ip_address')}\n"
+            f"Timestamp: {datetime.utcnow().isoformat()}"
+        ),
+    ]
+    # Wait for all tasks to complete
+    concurrent.futures.wait(futures)
+
+# ── Main Contact Form Handler ────────────────────────────────────
+def contact_form(data):
+    try:
+        _executor.submit(_process_contact, data)
+        return {
+            "success": True,
+            "message": "Message received!",
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e),
+        }
