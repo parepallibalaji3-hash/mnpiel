@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 load_dotenv()
 db = get_db()
 
-# ── Reusable SMTP Send ───────────────────────────────────────────
 def _send_email(to_email, subject, body):
     SMTP_EMAIL    = os.getenv("SMTP_USER")
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
@@ -28,7 +27,7 @@ def _send_email(to_email, subject, body):
         msg.attach(MIMEText(body, 'plain'))
 
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=10) as server:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=15) as server:
             server.login(SMTP_EMAIL, SMTP_PASSWORD)
             server.send_message(msg)
 
@@ -36,7 +35,6 @@ def _send_email(to_email, subject, body):
     except Exception as e:
         print(f"❌ Email error ({to_email}): {e}")
 
-# ── Main Contact Form Handler ────────────────────────────────────
 def contact_form(data):
     try:
         CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
@@ -79,14 +77,8 @@ def contact_form(data):
             f"Timestamp: {datetime.utcnow().isoformat()}"
         )
 
-        return {
-            "success": True,
-            "message": "Message received!",
-        }
+        return {"success": True, "message": "Message received!"}
 
     except Exception as e:
         print(f"❌ Error: {e}")
-        return {
-            "success": False,
-            "message": str(e),
-        }
+        return {"success": False, "message": str(e)}
