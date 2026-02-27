@@ -5,14 +5,10 @@ import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
-import threading
-import concurrent.futures
 from dotenv import load_dotenv
 
 load_dotenv()
 db = get_db()
-
-_executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
 # ── Reusable SMTP Send ───────────────────────────────────────────
 def _send_email(to_email, subject, body):
@@ -31,7 +27,6 @@ def _send_email(to_email, subject, body):
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
 
-        # Use port 465 with SSL (not 587 TLS — blocked on Render free tier)
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=10) as server:
             server.login(SMTP_EMAIL, SMTP_PASSWORD)
@@ -41,9 +36,13 @@ def _send_email(to_email, subject, body):
     except Exception as e:
         print(f"❌ Email error ({to_email}): {e}")
 
-# ── Save to Firebase ─────────────────────────────────────────────
-def _save_to_firebase(data):
+# ── Main Contact Form Handler ────────────────────────────────────
+def contact_form(data):
     try:
+        CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
+        ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+
+        # ── Save to Firebase ──────────────────────────────────────
         ref = db.reference("contacts")
         new_contact = ref.push({
             "name":       data.get("name"),
@@ -55,26 +54,18 @@ def _save_to_firebase(data):
             "ip_address": data.get("ip_address"),
         })
         print(f"✅ Saved to Firebase → {new_contact.key}")
-    except Exception as e:
-        print(f"❌ Firebase error: {e}")
 
-# ── Background Task: Save + Emails ──────────────────────────────
-def _process_contact(data):
-    CLIENT_NAME = os.getenv("CLIENT_NAME", "MNPIEPL")
-    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-
-    futures = [
-        _executor.submit(_save_to_firebase, data),
-        _executor.submit(
-            _send_email,
+        # ── Send User Thank You Email ─────────────────────────────
+        _send_email(
             data["email"],
             "Thank you for contacting us!",
             f"Hi {data['name']},\n\n"
             f"Thank you for reaching out! We received your message and will get back to you soon.\n\n"
             f"Best regards,\n{CLIENT_NAME} Team"
-        ),
-        _executor.submit(
-            _send_email,
+        )
+
+        # ── Send Admin Notification Email ─────────────────────────
+        _send_email(
             ADMIN_EMAIL,
             f"New Contact Form - {data.get('subject')}",
             f"NEW CONTACT FORM SUBMISSION\n\n"
@@ -86,20 +77,15 @@ def _process_contact(data):
             f"---\n"
             f"IP:        {data.get('ip_address')}\n"
             f"Timestamp: {datetime.utcnow().isoformat()}"
-        ),
-    ]
-    # Wait for all tasks to complete
-    concurrent.futures.wait(futures)
+        )
 
-# ── Main Contact Form Handler ────────────────────────────────────
-def contact_form(data):
-    try:
-        _executor.submit(_process_contact, data)
         return {
             "success": True,
             "message": "Message received!",
         }
+
     except Exception as e:
+        print(f"❌ Error: {e}")
         return {
             "success": False,
             "message": str(e),
