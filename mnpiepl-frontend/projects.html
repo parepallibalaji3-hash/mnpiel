@@ -1,132 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Our Projects — MNPIEPL</title>
-  <meta name="description" content="Explore MNPIEPL project portfolio — construction, land surveying, core drilling, drone mapping, and design projects across Telangana."/>
-  <link rel="icon" href="assets/logo.jpg" type="image/jpeg"/>
-  <link rel="stylesheet" href="css/style.css"/>
-  <link rel="stylesheet" href="css/projects.css"/>
-  <!-- Firebase JS SDK (compat) — config fetched dynamically from backend -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+  <title>Our Projects | MNPIEPL</title>
+
+  <!-- GOOGLE FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- MAIN CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- PROJECT CSS -->
+  <link rel="stylesheet" href="css/projects.css">
+
 </head>
+
 <body>
 
-  <!-- Navbar & Footer injected by main.js -->
+  <!-- HERO -->
 
-  <!-- ═══ PAGE HERO ══════════════════════════════════════════ -->
   <div class="page-hero">
+
     <div class="page-hero-inner">
-      <div class="page-eyebrow">Portfolio</div>
-      <h1 class="page-h1">Our <span>Projects</span></h1>
+
+      <div class="page-eyebrow">
+        Portfolio
+      </div>
+
+      <h1 class="page-h1">
+        Our <span>Projects</span>
+      </h1>
+
     </div>
+
   </div>
 
-  <!-- ═══ PROJECTS ═══════════════════════════════════════════ -->
+  <!-- PROJECT SECTION -->
+
   <div class="section">
-    <div class="sec-tag">Case Studies</div>
-    <h2 class="sec-title">Work that <span>Speaks</span></h2>
+
+    <div class="sec-tag">
+      Case Studies
+    </div>
+
+    <h2 class="sec-title">
+      Work that <span>Speaks</span>
+    </h2>
+
     <div class="sec-rule"></div>
 
-    <!-- Filter -->
-    <div class="filter-row" id="filterRow">
-      <button class="filt-btn active" data-f="all">All</button>
-      <button class="filt-btn" data-f="construction">Construction</button>
-      <button class="filt-btn" data-f="survey">Land Survey</button>
-      <button class="filt-btn" data-f="drilling">Core Drilling</button>
-      <button class="filt-btn" data-f="drone">Drone Mapping</button>
-      <button class="filt-btn" data-f="design">Design &amp; Estimation</button>
+    <!-- FILTERS -->
+
+    <div class="filter-row">
+
+      <button class="filt-btn active" data-filter="all">
+        All
+      </button>
+
+      <button class="filt-btn" data-filter="construction">
+        Construction
+      </button>
+
+      <button class="filt-btn" data-filter="survey">
+        Land Survey
+      </button>
+
+      <button class="filt-btn" data-filter="drilling">
+        Core Drilling
+      </button>
+
+      <button class="filt-btn" data-filter="drone">
+        Drone Mapping
+      </button>
+
+      <button class="filt-btn" data-filter="design">
+        Design & Estimation
+      </button>
+
     </div>
 
-    <!-- Status bar -->
-    <div class="proj-status" id="projStatus">
-      <span id="statusText">Loading projects from database…</span>
-      <span id="projCount" class="proj-count"></span>
+    <!-- PROJECT GRID -->
+
+    <div class="proj-grid">
+
+      <!-- PROJECT 1 -->
+
+      <div class="proj-card construction">
+
+        <div class="proj-img">
+          <img src="assets/railway.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Railway and Metro Rail
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Railway and Metro Rail</h2>
+
+            <p>
+              Complete railway and metro infrastructure services
+              including alignment surveys, route planning,
+              track mapping and engineering support.
+            </p>
+
+            <ul>
+              <li>Railway Alignment Surveys</li>
+              <li>Metro Corridor Mapping</li>
+              <li>Track Design Support</li>
+              <li>Infrastructure Planning</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 2 -->
+
+      <div class="proj-card design">
+
+        <div class="proj-img">
+          <img src="assets/urban.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Urban Planning Master Plans
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Urban Planning Master Plans</h2>
+
+            <p>
+              Smart city and urban development planning
+              including land use mapping and GIS analysis.
+            </p>
+
+            <ul>
+              <li>City Development Plans</li>
+              <li>Land Use Mapping</li>
+              <li>Zoning Analysis</li>
+              <li>Urban GIS Services</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 3 -->
+
+      <div class="proj-card survey">
+
+        <div class="proj-img">
+          <img src="assets/water.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Irrigation and Water Resources
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Irrigation and Water Resources</h2>
+
+            <p>
+              Water resource management and irrigation
+              infrastructure planning services.
+            </p>
+
+            <ul>
+              <li>Canal Surveys</li>
+              <li>Hydrology Analysis</li>
+              <li>Reservoir Mapping</li>
+              <li>Water Resource Planning</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 4 -->
+
+      <div class="proj-card construction">
+
+        <div class="proj-img">
+          <img src="assets/highway.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Highways and Roads
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Highways and Roads</h2>
+
+            <p>
+              Highway engineering and road infrastructure
+              services with terrain and alignment studies.
+            </p>
+
+            <ul>
+              <li>Road Alignment Surveys</li>
+              <li>Transportation Planning</li>
+              <li>Terrain Mapping</li>
+              <li>Road Corridor Studies</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 5 -->
+
+      <div class="proj-card construction">
+
+        <div class="proj-img">
+          <img src="assets/ports.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Ports and Shipyards
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Ports and Shipyards</h2>
+
+            <p>
+              Marine infrastructure planning including
+              coastal surveys and harbor engineering.
+            </p>
+
+            <ul>
+              <li>Coastal Surveys</li>
+              <li>Port Mapping</li>
+              <li>Marine Infrastructure</li>
+              <li>Harbor Engineering</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 6 -->
+
+      <div class="proj-card survey">
+
+        <div class="proj-img">
+          <img src="assets/gis.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Geospatial Services and GIS
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Geospatial Services and GIS</h2>
+
+            <p>
+              GIS and remote sensing services including
+              satellite mapping and spatial analysis.
+            </p>
+
+            <ul>
+              <li>GIS Mapping</li>
+              <li>Remote Sensing</li>
+              <li>Satellite Data Analysis</li>
+              <li>Spatial Planning</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 7 -->
+
+      <div class="proj-card drilling">
+
+        <div class="proj-img">
+          <img src="assets/power.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Transmission Lines and Power
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Transmission Lines and Power</h2>
+
+            <p>
+              Electrical infrastructure services
+              including transmission line planning.
+            </p>
+
+            <ul>
+              <li>Power Corridor Mapping</li>
+              <li>Tower Positioning</li>
+              <li>Electrical Surveys</li>
+              <li>Transmission Planning</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 8 -->
+
+      <div class="proj-card drilling">
+
+        <div class="proj-img">
+          <img src="assets/mining.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Mine Mapping
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Mine Mapping</h2>
+
+            <p>
+              Mining and quarry survey services
+              including drone and terrain mapping.
+            </p>
+
+            <ul>
+              <li>Mine Surveys</li>
+              <li>Drone Mapping</li>
+              <li>Volumetric Analysis</li>
+              <li>Terrain Modeling</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PROJECT 9 -->
+
+      <div class="proj-card drone">
+
+        <div class="proj-img">
+          <img src="assets/drone.jpg" alt="">
+        </div>
+
+        <div class="proj-body">
+
+          <h3>
+            Drone Survey and Mapping
+          </h3>
+
+          <div class="proj-detail-text" style="display:none;">
+
+            <h2>Drone Survey and Mapping</h2>
+
+            <p>
+              UAV based aerial survey services
+              including orthophoto generation
+              and topographic mapping.
+            </p>
+
+            <ul>
+              <li>UAV Surveys</li>
+              <li>Orthophoto Mapping</li>
+              <li>3D Terrain Models</li>
+              <li>Inspection Services</li>
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
 
-    <!-- Dynamic grid (Firebase) -->
-    <div class="proj-grid" id="projGrid">
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-    </div>
-
-    <!-- Static fallback grid (hidden by default) -->
-    <div class="proj-grid" id="staticGrid" style="display:none;">
-      <div class="proj-card" data-cat="construction">
-        <div class="proj-img c1">🏗️</div>
-        <div class="proj-body">
-          <div class="proj-cat">Construction</div>
-          <h3>Commercial Complex — Secunderabad</h3>
-          <p>G+4 commercial building, complete construction from pile foundation to finishing, 18-month delivery.</p>
-          <div class="proj-meta"><span>📅 2024</span><span>📍 Secunderabad</span></div>
-        </div>
-      </div>
-      <div class="proj-card" data-cat="survey">
-        <div class="proj-img c2">📐</div>
-        <div class="proj-body">
-          <div class="proj-cat">Land Survey</div>
-          <h3>100-Acre Layout Survey — Rangareddy</h3>
-          <p>Boundary demarcation, topographic survey, and subdivision plat for a 100-acre residential layout.</p>
-          <div class="proj-meta"><span>📅 2024</span><span>📍 Rangareddy</span></div>
-        </div>
-      </div>
-      <div class="proj-card" data-cat="drone">
-        <div class="proj-img c3">🚁</div>
-        <div class="proj-body">
-          <div class="proj-cat">Drone Mapping</div>
-          <h3>Quarry Volume Survey — Nalgonda</h3>
-          <p>UAV photogrammetric stockpile volume calculation for a granite quarry; 95-hectare coverage in one day.</p>
-          <div class="proj-meta"><span>📅 2024</span><span>📍 Nalgonda</span></div>
-        </div>
-      </div>
-      <div class="proj-card" data-cat="drilling">
-        <div class="proj-img c4">⛏️</div>
-        <div class="proj-body">
-          <div class="proj-cat">Core Drilling</div>
-          <h3>Soil Investigation — Industrial Park</h3>
-          <p>Geotechnical investigation with 12 bore holes to 15m depth for a proposed industrial park.</p>
-          <div class="proj-meta"><span>📅 2023</span><span>📍 Patancheru</span></div>
-        </div>
-      </div>
-      <div class="proj-card" data-cat="design">
-        <div class="proj-img c5">📋</div>
-        <div class="proj-body">
-          <div class="proj-cat">Design &amp; Estimation</div>
-          <h3>Hospital Building Design — Warangal</h3>
-          <p>Architectural and structural design for a 120-bed multi-specialty hospital including full BOQ.</p>
-          <div class="proj-meta"><span>📅 2023</span><span>📍 Warangal</span></div>
-        </div>
-      </div>
-      <div class="proj-card" data-cat="survey">
-        <div class="proj-img c6">🛰️</div>
-        <div class="proj-body">
-          <div class="proj-cat">Land Survey</div>
-          <h3>Road Alignment Survey — State Highway</h3>
-          <p>Longitudinal and cross-section survey for 35km state highway realignment with digital terrain modelling.</p>
-          <div class="proj-meta"><span>📅 2023</span><span>📍 Nalgonda Dist.</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Upload prompt (visible only when API is reachable) -->
-    <div class="upload-cta" id="uploadCta" style="display:none;">
-      <p>Want to add a project to this page? Upload it via the admin backend at <code>/api/projects</code>. New projects will appear here automatically.</p>
-      <a href="contact.html" class="btn-outline" style="margin-top:16px;display:inline-flex;">Contact Us to Upload a Project</a>
-    </div>
   </div>
 
-  <!-- CTA -->
-  <div class="cta-band">
-    <h2>Want to See More?</h2>
-    <p>Contact us for a detailed portfolio specific to your industry and project type.</p>
-    <a class="btn-white" href="contact.html">✉ Request Full Portfolio</a>
+  <!-- POPUP -->
+
+  <div class="proj-modal" id="projModal">
+
+    <div class="proj-modal-content">
+
+      <span class="proj-close" id="projClose">
+        &times;
+      </span>
+
+      <img id="modalImg" src="" alt="">
+
+      <div id="modalText"></div>
+
+    </div>
+
   </div>
+
+  <!-- MAIN JS -->
 
   <script src="js/main.js"></script>
-  <script src="js/projects.js"></script>
+
+  <!-- FILTER + POPUP SCRIPT -->
+
+  <script>
+
+    /* FILTERS */
+
+    const filterBtns =
+      document.querySelectorAll('.filt-btn');
+
+    const projectCards =
+      document.querySelectorAll('.proj-card');
+
+    filterBtns.forEach(btn => {
+
+      btn.addEventListener('click', () => {
+
+        filterBtns.forEach(b => {
+          b.classList.remove('active');
+        });
+
+        btn.classList.add('active');
+
+        const filter =
+          btn.getAttribute('data-filter');
+
+        projectCards.forEach(card => {
+
+          if(filter === 'all'){
+
+            card.style.display = 'block';
+
+          }
+
+          else if(card.classList.contains(filter)){
+
+            card.style.display = 'block';
+
+          }
+
+          else{
+
+            card.style.display = 'none';
+
+          }
+
+        });
+
+      });
+
+    });
+
+    /* POPUP */
+
+    const modal =
+      document.getElementById('projModal');
+
+    const modalImg =
+      document.getElementById('modalImg');
+
+    const modalText =
+      document.getElementById('modalText');
+
+    const closeBtn =
+      document.getElementById('projClose');
+
+    const cards =
+      document.querySelectorAll('.proj-card');
+
+    cards.forEach(card => {
+
+      card.addEventListener('click', () => {
+
+        const img =
+          card.querySelector('img').src;
+
+        const details =
+          card.querySelector('.proj-detail-text').innerHTML;
+
+        modalImg.src = img;
+
+        modalText.innerHTML = details;
+
+        modal.classList.add('show');
+
+      });
+
+    });
+
+    closeBtn.addEventListener('click', () => {
+
+      modal.classList.remove('show');
+
+    });
+
+    modal.addEventListener('click', (e) => {
+
+      if(e.target === modal){
+
+        modal.classList.remove('show');
+
+      }
+
+    });
+
+  </script>
+
 </body>
 </html>
